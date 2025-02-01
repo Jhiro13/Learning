@@ -1,0 +1,22 @@
+git help -> te ayuda p
+git config --global -> para configurar de manera global
+git config --global -e -> para ver las configuraciones
+>>>>git init -> inicializa o reinicia en repositorio local<<<<
+>>>>git status -> muestra el estado del árbol de trabajo<<<<
+git add <nombre_archivo o sino le pones . para todo> -> agrega el contenido del archivo al índice (los trackea y es previo al commit)
+git add *.html -> para todos los archivos con extension html
+git add js/*.js -> agregar todos los js del directorio js
+git add css/ -> agregar todo del directorio css
+>>>>git reset <nombre> -> te quita el archivo que estaba listo<<<<
+git commit -> registra los cambios en el repositorio
+---- git commit -m "primer commit" -> solo agrega mensaje
+>>>>git checkout -- . -> te reestablece todo antes de un commit<<<<
+git branch -> indica las ramas y en la que te encuentras trabajando
+git branch -m master main -> cambia el nombre de rama, tienes que volver a configurar la nueva rama
+>>>>git log -> muestra los registros de las commiteadas (hasheado)<<<<
+---CREAR ALIAS---
+git config --global alias.s status --short -> ahora con git s se ejecuta el git status --short
+git config --global alias.lg "log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all"
+(ya tengo git lg y git s)
+
+<<<<<<<<<.gitkeep>>>>>>>>> si creas este archivo en una carpeta por vscode, hace que la mantenga apesar de no tener nada

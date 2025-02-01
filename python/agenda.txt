@@ -1,0 +1,1 @@
+{'Jhiro Cisneros Sanchez': {'direccion': 'dasda', 'email': 'jhiro.cisneros.s@uni.pe', 'telefono': 917812606}, 'Yofre Cisneros Valencia': {'direccion': 'dwqewq', 'email': 'yofre.cisneros.v@uni.pe', 'telefono': 959021740}, 'Lily Sanchez Jara': {'direccion': 'safgds', 'email': 'lily.sanchez.j@uni.pe', 'telefono': 950919329}}
