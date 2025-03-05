@@ -1,0 +1,262 @@
+Option Explicit                     'Fuerza a declarar las variables
+Dim MiHojaNueva As String           'Retiene el nombre de la hoja nueva
+Dim MiHojaOrigen As String          'Retiene el nombre de la hoja con los datos
+Dim MiFecha As String               'Retiene el rango donde se alojan las fechas
+Dim MiGanancia As String            'Retiene el rango donde se alojan las ganancias
+Dim GananciaPorDiaInfo As String    'Contruye el String con el rango de la información de origen
+Dim MiInfoTabla As String           'Construye el String para datos origen de ambas tablas
+
+Sub ReporteMensualPorRegion()
+'Ejecuta el resto de las subs
+
+'Invocar las otras subs
+CapturarLaInformacion
+AgregarNuevaHoja
+GananciaPorDia
+GananciaPorVentas
+GananciaPorCategria
+AgregarComentario
+GraficoTorta
+
+End Sub
+
+Private Sub CapturarLaInformacion()
+'Código completo
+'Captura y retiene la información de origen
+
+    'Obtiene el nombre de la hoja con la información de origen
+    MiHojaOrigen = ActiveSheet.Name
+    'Captura el rango "Fecha" desde la columna A
+    MiFecha = Range(Range("A6"), Range("A6").End(xlDown)).Address
+    'Captura el rango "Ganancia" desde la columna G
+    MiGanancia = Range(Range("G6"), Range("G6").End(xlDown)).Address
+    'Construye la cadena de texto con la información para GananciaPorDia
+    GananciaPorDiaInfo = "'" & MiHojaOrigen & "'!" & MiFecha & ",'" & MiHojaOrigen & "'!" & MiGanancia
+
+    'Construit un string para origen de tablas
+    MiInfoTabla = MiHojaOrigen & "!" & Range("A6").CurrentRegion.Address
+    
+    
+End Sub
+Private Sub AgregarNuevaHoja()
+'Código completo
+'Agrega una nueva hoja
+
+    'Agregar hoja nueva
+    Sheets.Add After:=ActiveSheet
+    
+    'Orientar la página horizontalmente
+    ActiveSheet.PageSetup.Orientation = xlLandscape
+       
+    'Dimensionar hoja nueva
+    With ActiveSheet.PageSetup
+        .FitToPagesWide = 1
+        .FitToPagesTall = 1
+    End With
+    
+    'Retiene el nombre de la hoja recién creada
+    MiHojaNueva = ActiveSheet.Name
+    
+    
+    
+End Sub
+Private Sub GananciaPorDia()
+'Código completo
+'Genera y ajusta el gráfico de Ganancias por Día
+    
+    'Crea el gráfico
+    ActiveSheet.Shapes.AddChart2(201, xlColumnClustered).Select
+    ActiveChart.SetSourceData Source:=Range(GananciaPorDiaInfo)
+    
+    'Cambia el nombre del gráfico
+    ActiveChart.Parent.Name = "GananciaPorDiaGrafico"
+    
+    
+    'Corta/Copia/Pega el gráfico en donde lo querramos
+    ActiveChart.Parent.Cut
+    Sheets(MiHojaNueva).Select
+    Range("A5").Select
+    ActiveSheet.Paste
+    
+    'Dimensiona el gráfico
+    ActiveSheet.Shapes("GananciaPorDiaGrafico").Width = Range("a:i").Width
+    ActiveSheet.Shapes("GananciaPorDiaGrafico").Height = Range("a6:a21").Height
+    
+    'Cambia el título del gráfico
+    ActiveChart.ChartTitle.Text = "Ganancia por Día"
+        
+End Sub
+Private Sub GananciaPorVentas()
+'Código completo
+'Crea una tabla dinámica con las ganancias por vendedor
+
+    'Agregar la tabla
+    ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:= _
+        MiInfoTabla, Version:=6).CreatePivotTable TableDestination:= _
+        ActiveSheet.Range("A22"), TableName:="TablaDinámica4", DefaultVersion:=6
+        
+    'Cambiar el nombre de la tabla
+    ActiveSheet.PivotTables("TablaDinámica4").Name = "GananciaPorVentas"
+        
+    'Agregar el campo "Vendedor"
+    With ActiveSheet.PivotTables("GananciaPorVentas").PivotFields("Vendedor")
+        .Orientation = xlRowField
+        .Position = 1
+    End With
+    
+    'Agregar los valores
+    ActiveSheet.PivotTables("GananciaPorVentas").AddDataField ActiveSheet.PivotTables( _
+        "GananciaPorVentas").PivotFields("Ganancia"), "Suma de Ganancia", xlSum
+
+    'Cambiar la etiqueta
+    ActiveSheet.PivotTables("GananciaPorVentas").CompactLayoutRowHeader = _
+        "Vendedor"
+        
+    'Cambiar moneda
+    Range(Range("B23"), Range("B23").End(xlDown)).Style = "Currency"
+    
+    'Ordena de mayor a menor
+    ActiveSheet.PivotTables("GananciaPorVentas").PivotFields("Vendedor").AutoSort _
+        xlDescending, "Suma de Ganancia"
+
+End Sub
+Private Sub GananciaPorCategria()
+'Código completo
+'Crea una tabla dinámica con las ganancias por categoría
+
+'Agregar la tabla
+    ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:= _
+        MiInfoTabla, Version:=6).CreatePivotTable TableDestination:= _
+        ActiveSheet.Range("D22"), TableName:="TablaDinámica4", DefaultVersion:=6
+        
+    'Cambiar el nombre de la tabla
+    ActiveSheet.PivotTables("TablaDinámica4").Name = "GananciaPorCategoria"
+        
+    'Agregar el campo "Categoría"
+    With ActiveSheet.PivotTables("GananciaPorCategoria").PivotFields("Categoría")
+        .Orientation = xlRowField
+        .Position = 1
+    End With
+    
+    'Agregar los valores
+    ActiveSheet.PivotTables("GananciaPorCategoria").AddDataField ActiveSheet.PivotTables( _
+        "GananciaPorCategoria").PivotFields("Ganancia"), "Suma de Ganancia", xlSum
+
+    'Cambiar la etiqueta
+    ActiveSheet.PivotTables("GananciaPorCategoria").CompactLayoutRowHeader = _
+        "Categoría"
+        
+    'Cambiar moneda
+    Range(Range("E23"), Range("E23").End(xlDown)).Style = "Currency"
+    
+    'Ordena de mayor a menor
+    ActiveSheet.PivotTables("GananciaPorCategoria").PivotFields("Categoría").AutoSort _
+        xlDescending, "Suma de Ganancia"
+
+End Sub
+Sub AgregarComentario()
+
+Dim MiMes As String             'Retiene el més del reporte
+Dim MiAnio As String            'Retiene el año del reporte
+Dim MiRegion As String          'Retiene la región del reporte
+
+MiMes = MonthName(Month(Sheets(MiHojaOrigen).Range("B3").Value))
+MiAnio = Year(Sheets(MiHojaOrigen).Range("B3").Value)
+MiRegion = Sheets(MiHojaOrigen).Range("C7").Value
+
+    'Construye la String para comentario de A1
+    Range("A1").Value = "Reporte Mensual para " & MiMes & _
+                " de " & MiAnio & " en la Región " & MiRegion
+              
+        'Agregar formato a A1
+        Range("A1").Select
+                With Selection.Font
+                    .Size = 14
+                    .Bold = True
+                    .Color = -11489280
+                End With
+              
+    'Construye la String para comentario de A2
+    Range("A2").Value = "La ganancia total para " & MiMes & " de " _
+                & MiAnio & " en la región " & MiRegion & " fue de " _
+                & Format(Range("B22").End(xlDown).Value, "$0.00")
+        'Pone en negrita el mes
+        Range("A2").Characters(Start:=InStr(1, Range("A2").Value, _
+                MiMes, vbTextCompare), Length:=Len(MiMes)) _
+                .Font.FontStyle = "Negrita"
+        'Pone en negrita el año
+        Range("A2").Characters(Start:=InStr(1, Range("A2").Value, _
+                MiAnio, vbTextCompare), Length:=Len(MiAnio)) _
+                .Font.FontStyle = "Negrita"
+        'Pone en negrita la región
+        Range("A2").Characters(Start:=InStr(1, Range("A2").Value, _
+                MiRegion, vbTextCompare), Length:=Len(MiRegion)) _
+                .Font.FontStyle = "Negrita"
+        'Pone en negrita las ganancias
+        Range("A2").Characters(Start:=InStr(1, Range("A2").Value, _
+                Format(Range("B22").End(xlDown).Value, "$0.00"), _
+                vbTextCompare), Length:=Len(Format(Range("B22") _
+                .End(xlDown).Value, "$0.00"))) _
+                .Font.FontStyle = "Negrita"
+    
+    'Construye la String para comentario de A3
+    Range("A3").Value = "El vendedor con mejor desempeño fue " _
+                & Range("A23").Value & ", alcanzando una ganancia de " _
+                & Format(Range("B23").Value, "$0.00")
+        'Pone en negrita el mejor vendedor
+        Range("A3").Characters(Start:=InStr(1, Range("A3").Value, _
+                Range("A23").Value, vbTextCompare), Length:=Len _
+                (Range("A23").Value)).Font.FontStyle = "Negrita"
+        'Pone en negrita la ganancia
+        Range("A3").Characters(Start:=InStr(1, Range("A3").Value, _
+                Format(Range("B23").Value, "$0.00"), vbTextCompare), _
+                Length:=Len(Format(Range("B23").Value, "$0.00"))) _
+                .Font.FontStyle = "Negrita"
+                
+    'Construye la String para comentario de A4
+    Range("A4").Value = "La categoría que generó más ganancias fue " _
+                & Range("D23").Value & ", logrando una ganancia de " _
+                & Format(Range("E23").Value, "$0.00")
+        'Pone en negrita la mejor categoría
+        Range("A4").Characters(Start:=InStr(1, Range("A4").Value, _
+                Range("D23").Value, vbTextCompare), Length:=Len _
+                (Range("D23").Value)).Font.FontStyle = "Negrita"
+        'Pone en negrita la ganancia
+        Range("A4").Characters(Start:=InStr(1, Range("A4").Value, _
+                Format(Range("E23").Value, "$0.00"), vbTextCompare), _
+                Length:=Len(Format(Range("E23").Value, "$0.00"))) _
+                .Font.FontStyle = "Negrita"
+        
+End Sub
+
+Sub GraficoTorta()
+
+    'Creación Gráfico de torta
+    ActiveSheet.Shapes.AddChart2(251, xlPie).Select
+    ActiveChart.SetSourceData Source:=Range(Range("D22") _
+            .CurrentRegion.Address)
+            
+    'Cambia el nombre del gráfico
+    ActiveChart.Parent.Name = "GraficoTorta"
+    
+    'Reubicar el gráfico
+    ActiveChart.Parent.Cut
+    Range("G22").Select
+    ActiveSheet.Paste
+    
+    'Dimensiona el gráfico
+    ActiveSheet.Shapes("GraficoTorta").Width = Range("g:i").Width
+    ActiveSheet.Shapes("GraficoTorta").Height = Range("a22:a33").Height
+    
+    'Cambiar título
+    ActiveChart.ChartTitle.Text = "División por Categorías"
+    
+    'Agregar etiequtas
+    ActiveChart.FullSeriesCollection(1).ApplyDataLabels
+    ActiveChart.FullSeriesCollection(1).DataLabels.Select
+    Selection.Position = xlLabelPositionOutsideEnd
+        
+    'Eliminar datos agregados
+    ActiveChart.ShowAllFieldButtons = False
+    
+End Sub
